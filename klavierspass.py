@@ -1,5 +1,5 @@
 #!/bin/python3
-import pkg_resources
+import argparse
 import imageio
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
@@ -76,16 +76,45 @@ def save_pdf(images, filename):
     else:
         images[0].save(filename,save_all=True, append_images=images[1:])
 
-def main():
-    notes=[" d' h' a' g' d'  d' d' d' h' a' g' e'",
-           " e' c'' h' a' fis'    d'' d'' c'' a' h'",
-           " d' h' a' g' d'    d' h' a' g' e'",
-           "e' e' c'' h' a' d'' d'' d'' d'' e'' d'' c'' a' g'",
-           "d'' h' h' h'  h' h' h'  h' d'' g' a' h'",
-           "c'' c'' c'' c'' c'' h' h' h' h' h' a' a' h' a' d'"]
-    images=arange_image(notes, title='Jingle Bells', author='Weihnachten', space=0 ,line_h=500, scale=.22, note_w=140)
-    #image[0].show()
-    save_pdf(images, 'jinglebells.pdf')
+def tannenbaum():
+    notes=[" d' g' g' g'   a' h' h' h'",
+           " h' a' h' c'' fis' a' g'",
+           " d'' d'' h' e'' d'' d'' c'' c''",  
+           " c'' c'' a' d'' c'' c'' h' h'"]
+    images=arange_image(notes, title='Oh Tannenbaum', author='Weihnachten', space=0 ,line_h=800, scale=.3, note_w=200)
+    #images[0].show()
+    save_pdf(images, 'oh_tannenbaum.pdf')
+    
+def swarn():
+    notes =[" e''  a' h' c'' d'' e''  c'' e''  c'' e''"," a' c'' a' f' c'' a'  f' d'' c'' h' e''"]
+    images=arange_image(notes, title='Schwanensee', author='Tchaikovsky', space=0 ,line_h=800, scale=.3, note_w=200,height=2480, width=3508)
+    save_pdf(images, 'swarnlake.pdf')
+
+
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Set notes sheets with images')
+    parser.add_argument('infile',  type=str, help='textfile with notes')
+    parser.add_argument('--title', help='song title', required=True)
+    parser.add_argument('--author', help='song author', default='')
+    parser.add_argument('--space', help='space between lines in pixels', type=int, default=0)
+    parser.add_argument('--hline', help='line heigth in pixels',type=int,  default=800)
+    parser.add_argument('--scale', help='scaling factor for the note images', default=.3)
+    parser.add_argument('--note_w', help='space between notes in pixels',type=int,  default=200)
+    parser.add_argument('--height', help='sheet height in pixels',type=int,  default=2480)
+    parser.add_argument('--width', help='sheet width in pixels',type=int,  default=3508)
+    parser.add_argument('--outfile', help='filename for output', default=None)
+    args = parser.parse_args()
+    with open(args.infile) as f:
+        notes=[l.strip() for l in f.readlines()]
+    print(notes)
+    images=arange_image(notes, title=args.title, author=args.author, space=args.space, 
+                        line_h=args.hline, scale=args.scale, note_w=args.note_w,
+                        height=args.height, width=args.width)
+    if args.outfile is None:
+        outfile=args.title.replace(' ','_')+'.pdf'
+    else:
+        outfile=args.outfile
+
+    save_pdf(images, outfile)
+
